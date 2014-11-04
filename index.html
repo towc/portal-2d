@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Kittens Invader</title>
+    <style>
+        canvas{
+            position:absolute;
+            top:0px; left:0px;
+            background-image:url('img/background.png');
+            height:100vh;
+        }
+        #score:before{
+            content:'score: ';
+        }
+        #score{
+            position:absolute;
+            padding:10px;
+            top:calc(100vh - 50px);
+            left:10px;
+            background-color:rgba(0, 0, 0, 0.3);
+        }
+        #gameOver, #pause{
+            position:absolute;
+            top:0px;
+            left:0px;
+            width:100vw;
+            height:100vh;
+            text-align:center;
+            line-height:100vh;
+            transition: opacity 1s;
+            opacity:0;
+            background-color:white;
+        }
+        #pause{
+            line-height:10vh;
+        }
+        #gameOver.visible, #pause.visible{
+            opacity:.8;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="c"></canvas>
+    <div id="score"></div>
+    <div id="gameOver">Game Over!</div>
+    <div id="pause">
+        <p>Arrow keys to move
+        <p>space to shoot
+        <p>R to restart
+        <p>P to pause/unpause
+        <p>kill everything
+        <p>Q and A to shoot the portals
+    </div>
+       
+    <script src="Game.js"></script>
+    <script src="Controls.js"></script>
+    <script src="Drawer.js"></script>
+    <script src="Bodies.js"></script>
+    <script src="Objects.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>

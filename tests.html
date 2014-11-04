@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>things</title>
+        <style>
+            canvas{
+                position:absolute;
+                top:0px;
+                left:0px;
+                background-color:black;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id=c></canvas>
+        <script>
+            var w = c.width = window.innerWidth,
+                h = c.height = window.innerHeight,
+                ctx = c.getContext('2d');
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.strokeStyle = 'white';
+            
+            var cen = {x:w/2, y:h/2};
+            
+            document.addEventListener('mousemove', function(e){
+                
+                
+                ctx.fillRect(0, 0, w, h);
+                
+                var eX = e.clientX - cen.x,
+                    eY = e.clientY - cen.y;
+                
+                var rad = Math.atan(eY/eX);
+                
+                if(eX < 0) rad += Math.PI;
+                
+                var nX = cen.x + 200 * Math.cos(rad),
+                    nY = cen.y + 200 * Math.sin(rad);
+                
+                ctx.beginPath();
+                ctx.moveTo(cen.x, cen.y);
+                ctx.lineTo(nX, nY);
+                ctx.stroke();
+                ctx.closePath();
+            })
+        </script>
+    </body>
+</html>
