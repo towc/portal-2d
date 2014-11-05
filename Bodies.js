@@ -33,6 +33,31 @@ function checkCollision(b1, b2){
         b1.pos.y + b1.size.h < b2.pos.y
     )
 }
+
+function getDist(p1, p2){
+    return Math.sqrt(
+        (p2.x - p1.x) * (p2.x - p1.x) +
+        (p2.y - p1.y) * (p2.y - p1.y)
+    );
+}
+
+function compareDist(p1, p2, dist){
+    return (
+        ((p2.x - p1.x) * (p2.x - p1.x) +
+        (p2.y - p1.y) * (p2.y - p1.y)) <= dist * dist
+    )
+}
+
+function cenX(b){
+    return b.pos.x + b.size.w/2;
+}
+function cenY(b){
+    return b.pos.y + b.size.h/2;
+}
+function cen(b){
+    return {x: cenX(b), y: cenY(b)};
+}
+
 function Body(x, y, sizeW, sizeH, speed, jumpPower){
     this.pos = new Vec(x, y);
     this.vel = new Vec(0, 0);
@@ -48,6 +73,7 @@ function Body(x, y, sizeW, sizeH, speed, jumpPower){
     this.jumpPower = jumpPower;
     
     this.inPortal;
+    this.isSlimy = false;
     
     this.frame = 0;
 };
@@ -63,6 +89,7 @@ Body.prototype = {
         return (val / game.blockSize) | 0;
     },
     updatePos:function(){
+        
         if(!this.jumpt) ++this.updatesFromJump;
         if(this.wantsToJump && this.updatesFromJump > 10 && !this.jumpt) this.jump();
         
@@ -74,14 +101,24 @@ Body.prototype = {
         var blockX = this.getBlock(this.pos.x);
         var blockY = this.getBlock(this.pos.y);
         
+        this.isSlimy = false;
+        
         //if(this.pos.x > game.map[0].length * game.blockSize) return;
         this.notClipX(this.pos.x, this.pos.x += this.vel.x);
         
         //if(this.pos.y > game.map.length * game.blockSize) return;
         this.notClipY(this.pos.y, this.pos.y += this.vel.y, this.pos.x - this.vel.x);
         
-        this.vel.x *= 0.92;
-        this.acc.y *= 0.92;
+        var perc = this.isSlimy ? 0.99 : 0.92;
+        
+        this.vel.x *= perc;
+        this.acc.y *= perc;
+        
+        if(isNaN(this.acc.y)) this.acc.y = 0;
+        if(isNaN(this.acc.x)) this.acc.x = 0;
+        
+        if(Math.abs(this.vel.x) < 0.01) this.vel.x = 0;
+        if(Math.abs(this.vel.y) < 0.01) this.vel.y = 0;
     },
     notClipX: function(x, nX){
         var oldBlocks = [
@@ -98,12 +135,12 @@ Body.prototype = {
         var neg = nX < x;
         if(oldBlocks[0] !== newBlocks[0]){
             
-                 if(game.map[y][newBlocks[0]])  this.collideX(oldBlocks[0] * game.blockSize);
-            else if(game.map[yH][newBlocks[0]]) this.collideX(oldBlocks[0] * game.blockSize);
+                 if(game.interacting.indexOf(game.map[y][newBlocks[0]]) > -1)  this.collideX(oldBlocks[0] * game.blockSize, game.map[y][newBlocks[0]]);
+            else if(game.interacting.indexOf(game.map[yH][newBlocks[0]]) > -1) this.collideX(oldBlocks[0] * game.blockSize, game.map[yH][newBlocks[0]]);
         } else if(oldBlocks[1] !== newBlocks[1]){
             
-                 if(game.map[y][newBlocks[1]])  this.collideX((oldBlocks[1]+1) * game.blockSize - this.size.w -.001);
-            else if(game.map[yH][newBlocks[1]]) this.collideX((oldBlocks[1]+1) * game.blockSize - this.size.w -.001);
+                 if(game.interacting.indexOf(game.map[y][newBlocks[1]]) > -1)  this.collideX((oldBlocks[1]+1) * game.blockSize - this.size.w -.001, game.map[y][newBlocks[1]]);
+            else if(game.interacting.indexOf(game.map[yH][newBlocks[1]]) > -1) this.collideX((oldBlocks[1]+1) * game.blockSize - this.size.w -.001, game.map[yH][newBlocks[1]]);
         }
     },
     notClipY: function(y, nY, x){
@@ -122,14 +159,14 @@ Body.prototype = {
         var neg = nY < y;
         if(oldBlocks[0] !== newBlocks[0]){
             
-                 if(game.map[newBlocks[0]][x])  this.collideY(oldBlocks[0] * game.blockSize);
-            else if(game.map[newBlocks[0]][xW]) this.collideY(oldBlocks[0] * game.blockSize);
+                 if(game.interacting.indexOf(game.map[newBlocks[0]][x]) > -1)  this.collideY(oldBlocks[0] * game.blockSize, game.map[newBlocks[0]][x]);
+            else if(game.interacting.indexOf(game.map[newBlocks[0]][xW]) > -1) this.collideY(oldBlocks[0] * game.blockSize, game.map[newBlocks[0]][xW]);
         } else if(oldBlocks[1] !== newBlocks[1]){
             
             if(this.jumpt) this.jumpt = false;
             
-                 if(game.map[newBlocks[1]][x])  this.collideY((oldBlocks[1]+1) * game.blockSize - this.size.h -.001);
-            else if(game.map[newBlocks[1]][xW]) this.collideY((oldBlocks[1]+1) * game.blockSize - this.size.h -.001);
+                 if(game.interacting.indexOf(game.map[newBlocks[1]][x]) > -1)  this.collideY((oldBlocks[1]+1) * game.blockSize - this.size.h -.001, game.map[newBlocks[1]][x]);
+            else if(game.interacting.indexOf(game.map[newBlocks[1]][xW]) > -1) this.collideY((oldBlocks[1]+1) * game.blockSize - this.size.h -.001, game.map[newBlocks[1]][xW]);
                 //not actually part of the algorithm, but still usefull
             else if(!this.jumpt) this.jumpt = true;
         }
@@ -137,22 +174,49 @@ Body.prototype = {
     getBlock: function(val){
         return (val / game.blockSize) | 0;
     },
-    collideX: function(pos){
-        this.vel.x = 0;
-        this.acc.x *= 0.8;
+    collideX: function(pos, block){
+        this.collide(block);
+        
+        if(game.solid.indexOf(block) === -1) return;
+        
+        if(this.isSLimy){
+            this.vel.x *= -0.8;
+            this.acc.x *= -0.2;
+        }else{
+            this.vel.x = 0;
+            this.acc.x *= 0.8;
+        }
         
         this.pos.x = pos;
         
         this.allignX();
     },
-    collideY: function(pos){
-        this.vel.y = 0;
-        this.acc.y *= 0.8;
+    collideY: function(pos, block){
+        this.collide(block);
+        
+        if(!game.solid.indexOf(block) === -1) return;
+        
+        if(this.isSlimy){
+            this.vel.y *= -0.8;
+            this.acc.y *= -0.2;
+        }else{
+            this.vel.y = 0;
+            this.acc.y *= 0.8;
+        }
         
         this.pos.y = pos;
         
         this.allignY();
     },
+    collide: function(block){
+        
+        this.isSlimy = game.slimy.indexOf(block) > -1;
+        
+        if(this.isPlayer && game.portalRemoving.indexOf(block) > -1) this.removePortals();
+        if(game.killing.indexOf(block) > -1) this.kill();
+        if(this.isPlayer && game.finishing.indexOf(block) > -1) game.nextLevel();
+    },
+    kill: function(){},
     allignX:function(){},
     allignY:function(){}
 }
@@ -199,7 +263,7 @@ ProjectileBody.prototype = {
             this.lastX = blockX;
             this.lastY = blockY;
             
-            this.stop(side);
+            this.stop(side, game.map[blockY][blockX]);
         }
         
         this.lastX = blockX;
@@ -223,3 +287,10 @@ function StillBody(x, y, w, h){
 StillBody.prototype = {
     
 }
+
+function Text(x, y, content, size){
+    this.x = x;
+    this.y = y;
+    this.content = content;
+    this.size = size || 24;
+};

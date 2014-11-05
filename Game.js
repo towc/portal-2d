@@ -3,11 +3,57 @@ function Game(){
     
     this.drawer = new Drawer(this);
     
+    this.currMap = 0;
+    
     this.blockSize = 40;
-    this.maps = [  
-
-[[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,1,1,1,1,3,3,1,1,1,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,2],[2,2,2,2,4,2,2,2,2,2,4,2,2,2,2,4,2,2,2,2,2,2,4,2,2,2,4,2,2,2]]
+    this.maps = [
+        
+        [
+            [[2,2,2,2,2,2,2],[2,0,0,0,0,0,2],[2,1,0,0,0,7,2],[2,1,1,1,1,1,2],[2,2,2,2,2,2,2]], //actual map
+            [], //turrets
+            [2, 2], //player position
+            [new Text(this.blockSize - 10, this.blockSize - 20, 'Arrows or WASD to move into the door', 11)], //text tips
+            false, //has portals
+            false //has gun
+        ],[
+            [[2,2,2,2,2,2,2,2,2,2,2,2,2,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,7,0,2],[2,0,0,0,0,0,0,0,0,0,1,1,1,2],[2,0,0,0,0,1,0,0,1,1,1,1,1,2],[2,0,0,0,1,1,0,0,1,1,1,1,1,2],[2,1,1,1,1,1,1,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,1,1,1,1,1,1,2],[2,2,2,2,2,2,2,2,2,2,2,2,2,2]],
+            [],
+            [2, 5],
+            [
+                new Text(this.blockSize *2, this.blockSize *2, 'Press UP or W to jump up to 2 blocks', 11),
+                new Text(this.blockSize * 2, this.blockSize *3, '(depends on your settings)', 9)
+            ],
+            false,
+            false
+        ],[[[2,2,2,2,2,2,2,2,2,2,2,2,2,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,7,0,2],[2,1,1,1,1,1,0,1,1,1,1,1,1,2],[2,0,0,0,0,1,8,1,0,0,0,0,0,2],[2,0,0,0,0,1,8,1,0,0,0,0,0,2],[2,0,1,0,0,1,8,1,0,0,1,0,0,2],[2,2,2,2,2,2,2,2,2,2,2,2,2,2]],[new Turret(this.blockSize*2+0.01,this.blockSize*6+0.01,7),new Turret(this.blockSize*10+0.01,this.blockSize*7+0.01,7*this.blockSize)],[2,3],[new Text(this.blockSize*1.5,this.blockSize*1.5,'Those are turrets with a tracking distance of 7 blocks',10),new Text(this.blockSize*1.5,this.blockSize*2.5,' You don\'t want to get touched by their laser',11),new Text(this.blockSize*4,this.blockSize*7,'Here\'s some acid, in case you needed some',9)],false,false],
+        [[[2,2,2,2,2,2,2,2,2,2,2,2,2,2],[2,0,0,0,0,0,1,1,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,7,0,2],[2,0,0,0,0,0,2,2,2,2,2,2,2,2],[2,0,0,0,0,0,0,0,0,0,0,0,1,2],[2,0,0,0,0,0,0,0,0,0,0,0,1,2],[2,2,2,2,2,2,2,2,2,2,2,2,2,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,2,2,2,2,2,2,2,2,2,2,2,2,2]],[],[2,6],[new Text(this.blockSize*1.25,this.blockSize*8.25,'Press Q/A or Q/E to shoot portals, which can only be set on white blocks',10)],true,false],
+        [[[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,1,1,1,1,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,3,1,1,1,1,1,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,1,1,1,3,3,3,3,3,3,1,1,1,1,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,2,2,2,2,2,2,4,4,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]],[],[2,2],[new Text(this.blockSize*6,this.blockSize*14,'green blocks make you bounce and have almost no friction',30)],false,false],
+        [[[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,2],[2,0,0,2,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,2],[2,0,0,2,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,2],[2,0,0,2,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,2],[2,2,2,2,5,5,5,2,2,2,2,2,2,1,1,2,0,0,0,0,2,2,5,5,2,0,0,0,0,2],[2,0,0,0,0,0,0,0,1,0,0,0,0,0,0,2,8,8,8,8,2,2,0,0,2,0,0,0,0,2],[2,0,0,0,0,0,0,0,1,0,0,0,0,0,0,2,8,8,8,8,2,2,0,0,2,0,0,0,0,2],[2,0,0,0,0,0,0,0,1,0,0,0,0,0,0,2,8,8,8,8,2,2,0,0,2,0,0,0,0,2],[2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,2,0,0,0,0,2],[2,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,0,0,0,0,2],[2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,1,0,0,0,0,2],[2,0,0,0,0,0,0,0,2,0,7,0,0,0,0,0,0,0,0,0,6,0,0,0,1,0,0,0,0,2],[2,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,2,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]],[],[2,10],[],true,false]
     ]
+    
+    this.dictionary = {
+        air: 0,
+        white: 1,
+        black: 2,
+        slimyWhite: 3,
+        slimyBlack: 4,
+        glass: 5,
+        separator : 6,
+        door : 7,
+        acid : 8
+    }
+    
+    var dic = this.dictionary;
+    
+    this.transparent = [dic.air, dic.glass];
+    this.solid = [dic.white, dic.black, dic.slimyWhite, dic.slimyBlack, dic.glass];
+    this.settable = [dic.white, dic.slimyWhite];
+    this.slimy = [dic.slimyWhite, dic.slimyBlack];
+    this.portalRemoving = [dic.separator];
+    this.finishing = [dic.door];
+    this.killing = [dic.acid];
+                      
+    this.interacting = this.solid.concat(this.portalRemoving, this.finishing, this.killing);
         
     this.updateMs = 10;
         
@@ -28,10 +74,9 @@ Game.prototype = {
         
         this.score = 0;
         
-        this.currMap = 0;
-        this.map = this.maps[this.currMap];
+        var map = this.maps[this.currMap];
         
-        this.transparent = [0];
+        this.map = map[0];
         
         this.ww = this.map[0].length*this.blockSize;
         this.hh = this.map.length   *this.blockSize;
@@ -39,36 +84,20 @@ Game.prototype = {
         this.drawer.setLevel();
         this.drawer.el.gameOver.classList.remove('visible');
         
-        this.player = new Player(this.map[0].length * this.blockSize / 2 - 0.5, this.map.length * this.blockSize / 2);
+        this.player = new Player(map[2][0] * this.blockSize + 0.01, map[2][1] * this.blockSize + 0.01);
         
         this.npcs=[];
         this.bullets = [];
-        this.enemies = [];
+        this.enemies = map[1].slice(0);
+        this.texts = map[3].slice(0);
+        
+        this.portalsEnabled = map[4];
+        this.gunsEnabled = map[5];
+        
         this.portals = [];
         
         this.portalTypes = [];
         this.transitions = [];
-        
-        for(var i=0; i<0; ++i){
-            this.npcs.push(new Npc(
-                Math.random()*(this.map[0].length-2)*this.blockSize + this.blockSize,
-                Math.random()*(this.map.length-2)   *this.blockSize + this.blockSize,
-                this.gravity*Math.random()+game.gravity
-            ));
-        }
-        for(var i=0; i<3; ++i){
-            this.enemies.push(new Turret(
-                Math.random()*(this.map[0].length-2)*this.blockSize + this.blockSize,
-                Math.random()*(this.map.length-2)   *this.blockSize + this.blockSize,
-                Math.random()*Math.PI*2
-            ));
-        }
-        /*for(var i=0; i<1; ++i){
-            this.portals.push(new Portal(
-                Math.random() * (this.map[0].length - 3) * this.blockSize + this.blockSize, Math.random()*(this.map.length-3)*this.blockSize + this.blockSize,
-                Math.random() * (this.map[0].length - 3) * this.blockSize + this.blockSize, Math.random()*(this.map.length-3)*this.blockSize + this.blockSize
-            ))
-        }*/
         
         if(loop) this.unPause();
     },
@@ -114,7 +143,7 @@ Game.prototype = {
                 var npc = this.npcs[j];
                 
                 if(checkCollision(bull, npc)){
-                    this.npcs.splice(this.npcs.indexOf(npc), 1);
+                    npc.kil();
                     
                     this.score += 1;
                     
@@ -130,7 +159,7 @@ Game.prototype = {
                     
                 if(checkCollision(bull, en)){
                     
-                    this.enemies.splice(this.enemies.indexOf(en), 1);
+                    en.kill();
                     this.score += 2;
                 }
             }
@@ -166,6 +195,11 @@ Game.prototype = {
         this.loop();
         
         this.drawer.unPause();
+    },
+    nextLevel: function(){
+        ++this.currMap;
+        
+        this.start(true);
     }
 };
 

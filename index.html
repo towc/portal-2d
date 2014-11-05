@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Kittens Invader</title>
+    <title>portal 2d</title>
     <style>
         canvas{
             position:absolute;
@@ -10,10 +10,16 @@
             background-image:url('img/background.png');
             height:100vh;
         }
+        #pause:hover{
+            cursor:crosshair;
+        }
+        
         #score:before{
             content:'score: ';
         }
         #score{
+            display:none;
+            
             position:absolute;
             padding:10px;
             top:calc(100vh - 50px);

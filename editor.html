@@ -3,15 +3,23 @@
     <head>
         <title>Editor</title>
         <style>
+            table{
+                display:flex;
+                flex-direction:column;
+            }
+            tr{
+                display:flex;
+            }
             td{
                 width:10px;
                 height:10px;
-                background-color:blue;
+                background-color:gray;
                 margin:none;
                 padding:none;
             }
             td:hover{
                 cursor:pointer;
+                opacity: 0.8;
             }
             .v1{
                 background-color:lightgray;
@@ -25,21 +33,42 @@
             .v4{
                 background-color:green;
             }
+            .v5{
+                background-color:azure;
+            }
+            .v6{
+                background-color:blue;
+            }
+            .v7{
+                background-color:purple;
+            }
+            .v8{
+                background-color:red;
+            }
         </style>
     </head>
     <body>
         <table id=t></table>
+        <button id=addTurret>add turret</button>
+        <button id=addText>add text</button>
         <span id=end></span>
         <script>
             var width = prompt('width')||30,
                 height = prompt('height')||20,
-                ar=[];
+                ar=[
+                    [], //map
+                    [], //turrets
+                    [prompt('playerX') || width/2, prompt('playerY') || height/2], //player pos
+                    [], //texts
+                    !!prompt('hasPortals'),
+                    !!prompt('has guns')
+                ];
             
             for(var i=0; i<height; ++i){
                 var tr = document.createElement('tr');
                 t.appendChild(tr);
                 
-                ar.push([]);
+                ar[0].push([]);
                 
                 for(var j=0; j<width; ++j){
                     var td = document.createElement('td');
@@ -48,21 +77,21 @@
                     
                     var n = 2;
                     if(i===0||i===height-1||j===0||j===width-1){
-                        ar[i].push(n);
+                        ar[0][i].push(n);
                         td.className = 'v'+n;
                     } else {
-                        ar[i].push(0);
+                        ar[0][i].push(0);
                     }
                     
                     td.addEventListener('click', (function(i, j){
                         return function(){
                             var me = document.getElementById(i+'-'+j);
                             
-                            ++ar[i][j];
-                            ar[i][j]%=5;
+                            ++ar[0][i][j];
+                            ar[0][i][j]%=9;
                             
-                            me.className = 'v'+ar[i][j];
-                            if(ar[i][j]===0) me.className = '';
+                            me.className = 'v'+ar[0][i][j];
+                            if(ar[0][i][j]===0) me.className = '';
                             showAr();
                         }
                     })(i, j))
@@ -70,17 +99,40 @@
                 showAr();
             }
             function showAr(){
-                end.textContent='[';
-                for(var i=0; i<ar.length; ++i){
+                end.textContent='[[';
+                for(var i=0; i<ar[0].length; ++i){
                     end.textContent+='[';
-                        for(var j=0; j<ar[i].length; ++j){
-                            end.textContent+=ar[i][j];
-                            if(j<ar[i].length-1) end.textContent+=',';
+                        for(var j=0; j<ar[0][i].length; ++j){
+                            end.textContent+=ar[0][i][j];
+                            if(j<ar[0][i].length-1) end.textContent+=',';
                         }
                     end.textContent+=']';
-                    if(i<ar.length-1) end.textContent+=',';
+                    if(i<ar[0].length-1) end.textContent+=',';
                 }
-                end.textContent+=']';
+                end.textContent+='],[';
+                
+                for(var i = 0; i < ar[1].length; ++i){
+                    end.textContent += ar[1][i];
+                    if(i !== ar[1].length -1) end.textContent += ',';
+                }
+                
+                end.textContent += '],[' + ar[2][0] + ',' + ar[2][1] + '],[';
+                
+                for(var i = 0; i < ar[3].length; ++i){
+                    end.textContent += ar[3][i];
+                    if(i !== ar[3].length -1) end.textContent += ',';
+                }
+                
+                end.textContent += '],' + ar[4] +','+ar[5]+']';
+            }
+            
+            addTurret.onclick = function(){
+                ar[1].push('new Turret(this.blockSize*'+prompt('posX')+'+0.01,this.blockSize*'+prompt('posY')+'+0.01,'+prompt('tracking distance')+')');
+                showAr();
+            }
+            addText.onclick = function(){
+                ar[3].push('new Text(this.blockSize*'+prompt('posX')+',this.blockSize*'+prompt('posY')+',\''+prompt('message')+'\','+prompt('font size')+')');
+                showAr();
             }
         </script>
     </body>

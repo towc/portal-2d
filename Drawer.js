@@ -21,8 +21,6 @@ function Drawer(game){
         this.el[this.elIds[i]] = document.getElementById(this.elIds[i]);
     }
     
-    this.portalColors = ['red', 'green', 'blue', 'purple', 'brown', 'yellow', 'azure'];
-    
     window.addEventListener('resize', function(){
         game.drawer.ratio = window.innerHeight/ game.drawer.canvas.height;
     })
@@ -33,7 +31,6 @@ Drawer.prototype = {
         
         if(this.loadedImgs === this.imgSrcs.length){
             game.start(true);
-            game.pause();
         }
     },
     setLevel: function(){
@@ -83,6 +80,32 @@ Drawer.prototype = {
             }
             
             ctx.drawImage(this.images.portal, x, y, pt.size.w, pt.size.h, pt.pos.x, pt.pos.y, pt.size.w, pt.size.h);
+        }
+        
+        
+        //blocks
+        for(var i = 0; i < game.map[0].length; ++i){
+            for(var j = 0; j < game.map.length; ++j){
+                if(game.map[j][i] > 0) ctx.drawImage(this.images.blocks, (game.map[j][i]-1)*game.blockSize, 0, game.blockSize, game.blockSize, i * game.blockSize, j * game.blockSize, game.blockSize, game.blockSize);
+            }
+        }
+        
+        //text tips
+        var padding = 10;
+        
+        for(var i = 0; i < game.texts.length; ++i){
+            var txt = game.texts[i];
+            
+            ctx.font = txt.size + 'px Verdana';
+            
+            var width = ctx.measureText(txt.content).width,
+                height = 20;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillRect(txt.x - padding, txt.y - padding, width + 2* padding, height + 2*padding);
+            
+            ctx.fillStyle = 'black';
+            ctx.fillText(txt.content, txt.x, txt.y + height/2);
         }
         
         //portal bullets
@@ -173,15 +196,8 @@ Drawer.prototype = {
             bull.frame += 0.1;
         }
         
-        //blocks
-        for(var i = 0; i < game.map[0].length; ++i){
-            for(var j = 0; j < game.map.length; ++j){
-                if(game.map[j][i] > 0) ctx.drawImage(this.images.blocks, (game.map[j][i]-1)*game.blockSize, 0, game.blockSize, game.blockSize, i * game.blockSize, j * game.blockSize, game.blockSize, game.blockSize);
-            }
-        }
-        
         //aiming thing
-        ctx.drawImage(this.images.aim, 0, 0, 10, 10, game.player.shootX-5, game.player.shootY-5, 10, 10);
+        if(game.gunsEnabled || game.portalsEnabled) ctx.drawImage(this.images.aim, 0, 0, 10, 10, game.player.shootX-5, game.player.shootY-5, 10, 10);
         
         this.el.score.textContent = game.score;
     },
