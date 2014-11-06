@@ -86,7 +86,8 @@ Drawer.prototype = {
         //blocks
         for(var i = 0; i < game.map[0].length; ++i){
             for(var j = 0; j < game.map.length; ++j){
-                if(game.map[j][i] > 0) ctx.drawImage(this.images.blocks, (game.map[j][i]-1)*game.blockSize, 0, game.blockSize, game.blockSize, i * game.blockSize, j * game.blockSize, game.blockSize, game.blockSize);
+                
+                if(game.map[j][i] > 0) ctx.drawImage(this.images.blocks, (game.map[j][i]-1)*game.blockSize, game.tileData[j][i] * game.blockSize, game.blockSize, game.blockSize, i * game.blockSize, j * game.blockSize, game.blockSize, game.blockSize);
             }
         }
         
@@ -157,7 +158,7 @@ Drawer.prototype = {
         }
         
         ctx.drawImage(this.images.player, x, y, game.player.size.w, game.player.size.h, game.player.pos.x|0, game.player.pos.y|0, game.player.size.w|0, game.player.size.h|0);
-        game.player.frame += 0.2;
+        game.player.frame += 0.1;
         
         //npcs
         for(var i=0; i<game.npcs.length; ++i){
