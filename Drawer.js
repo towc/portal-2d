@@ -119,21 +119,21 @@ Drawer.prototype = {
         }
         
         //portal transitions
-        
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
         for(var i=0; i < game.transitions.length; ++i){
             var tr = game.transitions[i];
             
-            ctx.lineWidth = tr[5];
+            ctx.strokeStyle = tr.color;
+            
+            ctx.lineWidth = tr.width;
             
             ctx.beginPath();
-            ctx.moveTo(tr[0], tr[1]);
-            ctx.lineTo(tr[2], tr[3]);
+            ctx.moveTo(tr.p1.x, tr.p1.y);
+            ctx.lineTo(tr.p2.x, tr.p2.y);
             ctx.stroke();
             ctx.closePath();
             
-            --tr[5];
-            if(tr[5] <= 0) game.transitions.splice(i, 1); 
+            tr.width -= tr.decayStep;
+            if(tr.width <= 0) game.transitions.splice(i, 1); 
         }
         
         //player
@@ -185,16 +185,20 @@ Drawer.prototype = {
         
         for(var i=0; i < game.enemies.length; ++i){
             var en = game.enemies[i];
-            ctx.drawImage(this.images.turret, ((en.frame%2)|0)*en.size.w, 0, en.size.w, en.size.h, en.pos.x|0, en.pos.y|0, en.size.w, en.size.h);
+            ctx.drawImage(
+                this.images.turret,
+                ((en.frame%2)|0)*en.size.w,
+                en.tracking ? en.size.h : 0,
+                en.size.w, en.size.h, en.pos.x|0, en.pos.y|0, en.size.w, en.size.h);
             
-            en.frame += 0.5;
+            en.frame += 0.04;
         }
         
         for(var i=0; i < game.bullets.length; ++i){
             var bull = game.bullets[i];
             ctx.drawImage(this.images.bullet, bull.isEnemy ? bull.size.w : 0, 0, bull.size.w, bull.size.h, bull.pos.x, bull.pos.y, bull.size.w, bull.size.h);
             
-            bull.frame += 0.1;
+            bull.frame += bull.tracking ? 0.6 : 0.1;
         }
         
         //aiming thing

@@ -179,36 +179,37 @@ Body.prototype = {
     collideX: function(pos, block){
         this.collide(block);
         
-        if(game.solid.indexOf(block) === -1) return;
-        
-        if(this.isSLimy){
-            this.vel.x *= -0.8;
-            this.acc.x *= -0.2;
-        }else{
-            this.vel.x = 0;
-            this.acc.x *= 0.8;
+        if(game.solid.indexOf(block) !== -1){
+            if(this.isSLimy){
+                this.vel.x *= -0.8;
+                this.acc.x *= -0.2;
+            }else{
+                this.vel.x = 0;
+                this.acc.x *= 0.8;
+            }
+
+            this.pos.x = pos;
+
+            this.allignX();
         }
-        
-        this.pos.x = pos;
-        
-        this.allignX();
     },
     collideY: function(pos, block){
         this.collide(block);
         
-        if(!game.solid.indexOf(block) === -1) return;
-        
-        if(this.isSlimy){
-            this.vel.y *= -0.8;
-            this.acc.y *= -0.2;
-        }else{
-            this.vel.y = 0;
-            this.acc.y *= 0.8;
-        }
-        
-        this.pos.y = pos;
-        
-        this.allignY();
+        if(game.solid.indexOf(block) !== -1){
+            if(this.isSlimy){
+                this.vel.y *= -0.8;
+                this.acc.y *= -0.2;
+            }else{
+                this.vel.y = 0;
+                this.acc.y *= 0.8;
+            }
+
+            this.pos.y = pos;
+
+            this.allignY();
+        } else //if(this.vel.y > 0)
+            this.jumpt = true;
     },
     collide: function(block){
         
@@ -235,6 +236,8 @@ function ProjectileBody(x, y, w, h, sX, sY){
     
     this.lastX = 0;
     this.lastY = 0;
+    
+    this.lastPos = new Vec(x, y);
 }
 ProjectileBody.prototype = {
     jump: function(){
@@ -247,6 +250,9 @@ ProjectileBody.prototype = {
         return (val / game.blockSize) | 0;
     },
     updatePos:function(){
+        
+        this.lastPos.x = this.pos.x;
+        this.lastPos.y = this.pos.y;
         
         this.vel.updateV(this.acc);
         this.pos.updateV(this.vel);
@@ -276,6 +282,25 @@ ProjectileBody.prototype = {
     },
     stop: function(){} 
 }
+function InstantProjectileBody(x, y, dir){
+    ProjectileBody.call(this, x, y, 1, 1, Math.cos(dir), Math.sin(dir));
+    
+    this.hasHit = false;
+    this.side = false;
+    this.endBlock = false;
+}
+InstantProjectileBody.prototype = Object.create(ProjectileBody.prototype);
+
+InstantProjectileBody.prototype.stop = function(side, block){
+    this.hasHit = true;
+    this.side = side;
+    this.endBlock = block;
+}
+InstantProjectileBody.prototype.use = function(){
+    while(!this.hasHit){
+        this.updatePos();
+    }
+}
 
 function StillBody(x, y, w, h){
     this.pos = new Vec(x, y);
@@ -296,3 +321,11 @@ function Text(x, y, content, size){
     this.content = content;
     this.size = size || 24;
 };
+
+function Transition(p1, p2, color, width, decayStep){
+    this.width = width;
+    this.p1 = p1;
+    this.p2 = p2;
+    this.color = color;
+    this.decayStep = decayStep;
+}

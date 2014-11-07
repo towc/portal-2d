@@ -91,6 +91,7 @@ Game.prototype = {
         
         this.npcs=[];
         this.bullets = [];
+        this.lasers = [];
         this.enemies = map[2].slice(0);
         this.texts = map[4].slice(0);
         
@@ -138,8 +139,10 @@ Game.prototype = {
         for(var i=0; i< this.enemies.length; ++i){
             this.enemies[i].update();
         }
-        for(var i=0; i<this.bullets.length; ++i){
-            var bull = this.bullets[i];
+        
+        var projectiles = this.bullets.concat(this.lasers);
+        for(var i=0; i < projectiles.length; ++i){
+            var bull = projectiles[i];
             bull.update();
             
             for(var j = 0; j < this.npcs.length; ++j){
@@ -168,6 +171,18 @@ Game.prototype = {
             }
         }
         
+        for(var i = 0; i < this.lasers.length; ++i){
+            var ls = this.lasers[i];
+            
+            game.transitions.push(new Transition(
+                ls.pos,
+                ls.lastPos,
+                'rgba(255, 0, 0, 0.5)',
+                4,
+                0.2
+            ))
+        }
+        
         /*for(var i=0; i<this.portals.length; ++i){
             this.portals[i].update();
         }*/
@@ -179,6 +194,9 @@ Game.prototype = {
     },
     stopBullet: function(bull){
         this.bullets.splice(this.bullets.indexOf(bull), 1);
+    },
+    stopLaser: function(laser){
+        this.lasers.splice(this.lasers.indexOf(laser), 1);
     },
     gameOver: function(){
         this.running = false;
