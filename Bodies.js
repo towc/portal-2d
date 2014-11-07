@@ -83,7 +83,7 @@ Body.prototype = {
         this.updatesFromJump = 0;
         
         this.vel.y -= this.jumpPower*10;
-        this.acc.y -= this.jumpPower;
+        this.acc.y -= this.jumpPower/2;
     },
     getBlock:function(val){
         return (val / game.blockSize) | 0;
@@ -157,19 +157,21 @@ Body.prototype = {
         var x = this.getBlock(x);
         
         var neg = nY < y;
-        if(oldBlocks[0] !== newBlocks[0]){
+        //if(oldBlocks[0] !== newBlocks[0]){
+            this.jumpt = false;
             
                  if(game.interacting.indexOf(game.map[newBlocks[0]][x]) > -1)  this.collideY(oldBlocks[0] * game.blockSize, game.map[newBlocks[0]][x]);
             else if(game.interacting.indexOf(game.map[newBlocks[0]][xW]) > -1) this.collideY(oldBlocks[0] * game.blockSize, game.map[newBlocks[0]][xW]);
-        } else if(oldBlocks[1] !== newBlocks[1]){
+            else this.jumpt = true;
+        //} else if(oldBlocks[1] !== newBlocks[1]){
             
-            if(this.jumpt) this.jumpt = false;
+            this.jumpt = false;
             
                  if(game.interacting.indexOf(game.map[newBlocks[1]][x]) > -1)  this.collideY((oldBlocks[1]+1) * game.blockSize - this.size.h -.001, game.map[newBlocks[1]][x]);
             else if(game.interacting.indexOf(game.map[newBlocks[1]][xW]) > -1) this.collideY((oldBlocks[1]+1) * game.blockSize - this.size.h -.001, game.map[newBlocks[1]][xW]);
                 //not actually part of the algorithm, but still usefull
-            else if(!this.jumpt) this.jumpt = true;
-        }
+            else this.jumpt = true;
+        //}
     },
     getBlock: function(val){
         return (val / game.blockSize) | 0;
