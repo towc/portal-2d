@@ -1,5 +1,5 @@
 function Player(x, y){
-    Body.call(this, x, y, 20, 28, .15, game.gravity*1.8);
+    Body.call(this, x, y, 20, 28, .15, game.gravity*1.6);
     
     this.jumpt = false;
     this.timeSinceLastShoot = 0;

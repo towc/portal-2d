@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Portal 2d map editor</title>
+        <style id=style>
+            body{
+                background-color:beige;
+            }
+            #c {
+                background-image: url(img/background.png);
+            }
+            #c, #t{
+                position:absolute;
+                top:10px;
+                left:10px;
+                
+                flex-direction:column;
+                
+                width:700px;
+                height:500px;
+            }
+            #t, #t > tr, #t > tr > td, #s, #s > tr, #s > tr > td {
+                margin:0;
+                padding:0;
+                display:flex;
+                
+                transition:background 0.2s;
+            }
+            #t > tr > td:hover, #s > tr > td:hover{
+                background-color:rgba(255, 255, 255, 0.3);
+                cursor:pointer;
+            }
+            #s{
+                background-image:url(img/blocks.png);
+                background-size:100%;
+                
+                flex-direction:column;
+                
+                width: calc(30px * 9);
+            }
+            #objects{
+                margin-left:730px;
+                
+                border-left: 2px solid lightgray;
+                padding-left:10px;
+                
+                height: 600px;
+            }
+            #s > tr {
+                width:calc(30px * 9);
+            }
+            #s > tr > td {
+                width:30px;
+                height:30px;
+            }
+            #s > tr > td.chosen{
+                box-shadow: 0 0 10px white;
+                background-color: rgba(255, 255, 255, 0.3);
+            }
+            
+            #controls {
+                padding:10px;
+                
+                display:flex;
+            }
+            #controls > div{
+                flex:1;
+            }
+            #t.cross > tr > td:hover{
+                cursor:crosshair;
+            }
+            #playerEl{
+                position:absolute;
+                left:0;
+                top:0;
+                
+                width:10px;
+                height:20px;
+                background-color:brown;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id=c></canvas>
+        <table id=t></table>
+        <div id=playerEl>P</div>
+        
+        <div id=objects>
+            <table id=s></table>
+            
+            <div>
+                <p><button id=newTurret>Create Turret</button><br>
+                    tracking distance:<input id=trackingDistance></p>
+                <p><button id=newText>Create Text</button><br>
+                    content:<input id=content><br>
+                    size:<input id=size></p>
+                <p><button id=changePlayer>Change player position</button></p>
+            </div>
+        </div>
+        <hr/>
+        <div id=controls>
+            <div>
+                <p><button id=createNew>Generate New Map</button></p>
+                <p><input type=number value=14 id=widthInput> Width </p>
+                <p><input type=number value=10 id=heightInput> Height</p>
+                <p><input type=number value=5 id=playerX> Player spawnblock X</p>
+                <p><input type=number value=5 id=playerY> Player spawnblock y</p>
+                <p><input type=checkbox checked id=hasPortalsEl> portals enabled</p>
+                <p><input type=checkbox checked id=hasGunsEl> guns enabled</p>
+            </div>
+        
+            <div><span id=result>{}</span></div>
+        </div>
+        
+        <script>
+            var el = {
+                table: document.getElementById('t'),
+                canvas: document.getElementById('c'),
+                select: document.getElementById('s'),
+                style: document.getElementById('style'),
+                
+                createNewMap: document.getElementById('createNew'),
+                newTurret: document.getElementById('newTurret'),
+                trackingDist: document.getElementById('trackingDistance'),
+                newText: document.getElementById('newText'),
+                content: document.getElementById('content'),
+                size: document.getElementById('size'),
+                changePlayer: document.getElementById('changePlayer'),
+                playerEl: document.getElementById('playerEl'),
+                
+                widthInput: document.getElementById('widthInput'),
+                heightInput: document.getElementById('heightInput'),
+                playerX: document.getElementById('playerX'),
+                playerY: document.getElementById('playerY'),
+                hasPortalsEl: document.getElementById('hasPortalsEl'),
+                hasGunsEl: document.getElementById('hasGunsEl'),
+                
+                result: document.getElementById('result')
+            };
+            
+            var image = new Image();
+            image.src = 'img/blocks.png';
+            
+            var blockCount = 9,
+                tileDataCount = 14,
+                w = el.canvas.width = 700,
+                h = el.canvas.height = 500,
+                ctx = el.canvas.getContext('2d'),
+                attached = false, attachedPlayer = false,
+                map, chosenBlock = 0, chosenData = 0, width, height, blockSize;
+            
+            for(var i = 0; i < tileDataCount; ++i){
+                var tr = document.createElement('tr');
+                el.select.appendChild(tr);
+                
+                for(var j = 0; j < blockCount; ++j){
+                    var td = document.createElement('td');
+                    tr.appendChild(td);
+                    
+                    td.addEventListener('click', function(){
+                        clickSelection(this);
+                    })
+                }
+            }
+            
+            //default choose the first block
+            el.select.childNodes[0].childNodes[0].classList.add('chosen');
+            
+            function clickSelection(element){
+                var previousEl = el.select.childNodes[chosenData].childNodes[chosenBlock];
+                previousEl.classList.remove('chosen');
+                
+                chosenBlock = getChosenBlock(element);
+                chosenData = getChosenData(element);
+                
+                element.classList.add('chosen');
+            }
+            function getChosenBlock(element){
+                return getX(element);
+            }
+            function getChosenData(element){
+                return getY(element);
+            }
+            
+            function getX(element){
+                return [].indexOf.call(element.parentElement.childNodes, element);
+            }
+            function getY(element){
+                return [].indexOf.call(element.parentElement.parentElement.childNodes, element.parentElement);
+            }
+            
+            function createMap(){
+                map = {
+                    blocks: [],
+                    tileData: [],
+                    enemies: [],
+                    playerPos: {
+                       x:parseInt(el.playerX.value),
+                       y:parseInt(el.playerY.value)
+                    },
+                    textTips: [],
+                    hasPortals: el.hasPortalsEl.checked,
+                    hasGuns: el.hasGunsEl.checked
+                };
+                
+                width = parseInt(el.widthInput.value);
+                height = parseInt(el.heightInput.value);
+                
+                blockSize = Math.min(w / width, h / height);
+                
+                el.playerEl.style.top = (map.playerPos.y * blockSize) + 'px';
+                el.playerEl.style.left = (map.playerPos.x * blockSize) + 'px';
+                
+                el.style.sheet.addRule('#t > tr > td', 'width:'+blockSize+'px; height:'+blockSize+'px;');
+                
+                while(el.table.childNodes.length > 0){
+                    el.table.removeChild(el.table.childNodes[0]);
+                }
+                
+                for(var i = 0; i < height; ++i){
+                    var tr = document.createElement('tr');
+                    el.table.appendChild(tr);
+                    
+                    map.blocks.push([]);
+                    map.tileData.push([]);
+                    
+                    for(var j = 0; j < width; ++j){
+                        var td = document.createElement('td');
+                        tr.appendChild(td);
+                        
+                        map.blocks[i].push(
+                            (i === 0 || i === height-1 || j === 0 || j === width-1) ? 2 : 0
+                        );
+                        map.tileData[i].push(0);
+                        
+                        td.addEventListener('click', function(e){
+                            var x = getX(this),
+                                y = getY(this);
+                            
+                            if(attached){
+                                attached.from.x = x;
+                                attached.from.y = y;
+                                
+                                attached.to.push(attached.from);
+                                
+                                var thing = document.createElement('div');
+                                if(attached.from.text){
+                                    thing.textContent = attached.from.text;
+                                    thing.style.fontSize = attached.size + 'px';
+                                    thing.style.padding = blockSize/5 + 'px';
+                                    thing.style.backgroundColor = 'white';
+                                    
+                                    thing.title = 'remove text';
+                                    
+                                    document.body.appendChild(thing);
+                                } else {
+                                    thing.style.width = blockSize/2 + 'px';
+                                    thing.style.height = blockSize + 'px';
+                                    
+                                    thing.style.backgroundColor = 'red';
+                                    
+                                    thing.title = 'remove turret';
+                                }
+                                
+                                    
+                                thing.style.position = 'absolute';
+                                thing.style.top = e.clientY + 'px';
+                                thing.style.left = e.clientX + 'px';
+                                
+                                thing.inside = attached;
+                                
+                                document.body.appendChild(thing);
+                                
+                                thing.addEventListener('click', function(){
+                                    this.inside.to.splice(this.inside.to.indexOf(this.inside.from), 1);
+                                        
+                                    document.body.removeChild(this);
+                                });
+                                
+                                el.table.className = '';
+                                    
+                                attached = false;
+                                
+                            } else if(attachedPlayer){
+                                el.playerEl.style.top = e.clientY + 'px';
+                                el.playerEl.style.left = e.clientX + 'px';
+                                
+                                map.playerPos.x = x;
+                                map.playerPos.y = y;
+                                
+                                attachedPlayer = false;
+                                
+                            } else {
+                                map.blocks[y][x] = chosenBlock;
+                                map.tileData[y][x] = chosenData;
+                            }
+                            showMap();
+                        })
+                    }
+                }
+                
+                showMap();
+            }
+            function showMap(){
+                ctx.clearRect(0, 0, blockSize*w, blockSize*h);
+                
+                for(var y = 0; y < map.blocks.length; ++y){
+                    
+                    for(var x = 0; x < map.blocks[0].length; ++x){
+                        if(map.blocks[y][x] !== 0) ctx.drawImage(image, map.blocks[y][x]*40, map.tileData[y][x]*40, 40, 40, x*blockSize, y*blockSize, blockSize, blockSize);
+                    }
+                }
+                
+                showResult();
+            }
+            image.onload = createMap;
+            
+            function showResult(){
+                var res = '{blocks:[';
+                
+                //blocks
+                var blockRows = [],
+                    tileDataRows = [];
+                for(var i = 0; i < map.blocks.length; ++i){
+                    var str = '[';
+                    str += map.blocks[i].join(',');
+                    blockRows.push(str+']');
+                    
+                    var tileStr = '[';
+                    tileStr += map.tileData[i].join(',');
+                    tileDataRows.push(tileStr+']');
+                }
+                
+                res += blockRows.join(',') + '],tileData:[' + tileDataRows.join(',') + '],enemies:[';
+                
+                var enemyString = [];
+                for(var i = 0; i < map.enemies.length; ++i){
+                    var enemy = map.enemies[i];
+                    
+                    enemyString.push('{x:' + enemy.x + ',y:' + enemy.y + ',t:' + enemy.trackingDist + '}');
+                }
+                
+                res += enemyString.join(',') + '],playerPos:{x:' + map.playerPos.x + ',y:' + map.playerPos.y + '},textTips:[';
+                
+                var textStrings = [];
+                for(var i = 0; i < map.textTips.length; ++i){
+                    var txt = map.textTips[i];
+                    
+                    textStrings.push('{x:' + txt.x + ',y:' + txt.y + ',c:"' + txt.text + '",s:' + txt.size + '}');
+                }
+                
+                res += textStrings.join(',') + '],hasPortals:' + map.hasPortals + ',hasGuns:' + map.hasGuns;
+                
+                res += '}';
+                el.result.textContent = res;
+                
+                copy(res);
+            }
+            
+            function genTurret(){
+                attached = {to:map.enemies, from:{x:0, y:0, trackingDist:el.trackingDist.value}};
+                
+                el.table.className = 'cross';
+            }
+            function genText(){
+                attached = {to:map.textTips, from:{x:0, y:0, text:el.content.value, size:el.size.value}};
+                
+                el.table.className = 'cross';
+            }
+            
+            el.createNewMap.addEventListener('click', createMap);
+            
+            el.newTurret.addEventListener('click', genTurret);
+            el.newText.addEventListener('click', genText);
+            el.changePlayer.addEventListener('click', function(){
+                attachedPlayer = true;
+            })
+        </script>
+    </body>
+</html>

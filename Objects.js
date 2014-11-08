@@ -53,6 +53,12 @@ Turret.prototype.update=function(){
         if(x < 0) this.dir += Math.PI;
         
         ++this.lastShot;
+        
+        var bull = new InstantProjectileBody(tCen.x, tCen.y, this.dir);
+        bull.use();
+        
+        game.transitions.push(new Transition(tCen, bull.lastPos, 'rgba(255, 0, 0, 0.1)', 3, 1))
+        
         if(this.lastShot >=100 ) this.shoot();
         
     }

@@ -87,26 +87,28 @@ Drawer.prototype = {
         for(var i = 0; i < game.map[0].length; ++i){
             for(var j = 0; j < game.map.length; ++j){
                 
-                if(game.map[j][i] > 0) ctx.drawImage(this.images.blocks, (game.map[j][i]-1)*game.blockSize, game.tileData[j][i] * game.blockSize, game.blockSize, game.blockSize, i * game.blockSize, j * game.blockSize, game.blockSize, game.blockSize);
+                if(game.map[j][i] > 0) ctx.drawImage(this.images.blocks, game.map[j][i]*game.blockSize, game.tileData[j][i] * game.blockSize, game.blockSize, game.blockSize, i * game.blockSize, j * game.blockSize, game.blockSize, game.blockSize);
             }
         }
         
         //text tips
-        var padding = 10;
+        var padding = 4;
         
         for(var i = 0; i < game.texts.length; ++i){
-            var txt = game.texts[i];
+            var txt = game.texts[i],
+                x = (txt.x + 0.5) * game.blockSize,
+                y = (txt.y + 0.5) * game.blockSize;
             
-            ctx.font = txt.size + 'px Verdana';
+            ctx.font = txt.s + 'px Verdana';
             
-            var width = ctx.measureText(txt.content).width,
-                height = 20;
+            var width = ctx.measureText(txt.c).width,
+                height = txt.s;
             
             ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.fillRect(txt.x - padding, txt.y - padding, width + 2* padding, height + 2*padding);
+            ctx.fillRect(x - padding, y - padding, width + 2* padding, height + 2*padding);
             
             ctx.fillStyle = 'black';
-            ctx.fillText(txt.content, txt.x, txt.y + height/2);
+            ctx.fillText(txt.c, x, y + height/2);
         }
         
         //portal bullets

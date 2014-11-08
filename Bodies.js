@@ -82,8 +82,7 @@ Body.prototype = {
         this.jumpt = true;
         this.updatesFromJump = 0;
         
-        this.vel.y -= this.jumpPower*10;
-        this.acc.y -= this.jumpPower/2;
+        this.vel.y -= this.jumpPower*15;
     },
     getBlock:function(val){
         return (val / game.blockSize) | 0;
@@ -314,13 +313,6 @@ function StillBody(x, y, w, h){
 StillBody.prototype = {
     
 }
-
-function Text(x, y, content, size){
-    this.x = x;
-    this.y = y;
-    this.content = content;
-    this.size = size || 24;
-};
 
 function Transition(p1, p2, color, width, decayStep){
     this.width = width;
